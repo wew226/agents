@@ -6,7 +6,6 @@ import requests
 from pypdf import PdfReader
 import gradio as gr
 
-
 load_dotenv(override=True)
 
 def push(text):
@@ -15,10 +14,10 @@ def push(text):
         data={
             "token": os.getenv("PUSHOVER_TOKEN"),
             "user": os.getenv("PUSHOVER_USER"),
-            "message": text,
+            "message": text, 
+            "sound": "magic",
         }
     )
-
 
 def record_user_details(email, name="Name not provided", notes="not provided"):
     push(f"Recording {name} with email {email} and notes {notes}")
@@ -72,21 +71,19 @@ record_unknown_question_json = {
 tools = [{"type": "function", "function": record_user_details_json},
         {"type": "function", "function": record_unknown_question_json}]
 
-
 class Me:
 
     def __init__(self):
         self.openai = OpenAI()
-        self.name = "Ed Donner"
-        reader = PdfReader("me/linkedin.pdf")
-        self.linkedin = ""
+        self.name = "William Wu"
+        reader = PdfReader("me/resume_data_scientist.pdf")
+        self.resume = ""
         for page in reader.pages:
             text = page.extract_text()
             if text:
-                self.linkedin += text
+                self.resume += text
         with open("me/summary.txt", "r", encoding="utf-8") as f:
             self.summary = f.read()
-
 
     def handle_tool_call(self, tool_calls):
         results = []
@@ -103,12 +100,12 @@ class Me:
         system_prompt = f"You are acting as {self.name}. You are answering questions on {self.name}'s website, \
 particularly questions related to {self.name}'s career, background, skills and experience. \
 Your responsibility is to represent {self.name} for interactions on the website as faithfully as possible. \
-You are given a summary of {self.name}'s background and LinkedIn profile which you can use to answer questions. \
+You are given a summary of {self.name}'s background and resume which you can use to answer questions. \
 Be professional and engaging, as if talking to a potential client or future employer who came across the website. \
 If you don't know the answer to any question, use your record_unknown_question tool to record the question that you couldn't answer, even if it's about something trivial or unrelated to career. \
 If the user is engaging in discussion, try to steer them towards getting in touch via email; ask for their email and record it using your record_user_details tool. "
 
-        system_prompt += f"\n\n## Summary:\n{self.summary}\n\n## LinkedIn Profile:\n{self.linkedin}\n\n"
+        system_prompt += f"\n\n## Summary:\n{self.summary}\n\n## Resume:\n{self.resume}\n\n"
         system_prompt += f"With this context, please chat with the user, always staying in character as {self.name}."
         return system_prompt
     
@@ -127,7 +124,6 @@ If the user is engaging in discussion, try to steer them towards getting in touc
                 done = True
         return response.choices[0].message.content
     
-
 if __name__ == "__main__":
     me = Me()
     gr.ChatInterface(me.chat, type="messages").launch()
