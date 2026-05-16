@@ -76,13 +76,13 @@ class Me:
     def __init__(self):
         self.openai = OpenAI()
         self.name = "William Wu"
-        reader = PdfReader("me/resume_data_scientist.pdf")
+        reader = PdfReader("me/data_analyst_05152026.pdf")
         self.resume = ""
         for page in reader.pages:
             text = page.extract_text()
             if text:
                 self.resume += text
-        with open("me/summary.txt", "r", encoding="utf-8") as f:
+        with open("me/summary_05152026.txt", "r", encoding="utf-8") as f:
             self.summary = f.read()
 
     def handle_tool_call(self, tool_calls):
